@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.gildedrose.GildedRose.AGED_BRIE;
 import static com.gildedrose.GildedRose.BACKSTAGE_PASSES;
+import static com.gildedrose.GildedRose.CONJURED;
 import static com.gildedrose.GildedRose.SULFURAS;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,7 @@ class GildedRoseTest {
         var updatedItem = app.items[0];
         assertThat(updatedItem.name).isEqualTo(REGULAR_GOODS);
         assertThat(updatedItem.quality).isEqualTo(4);
-        assertThat(updatedItem.sellIn).isEqualTo(0);
+        assertThat(updatedItem.sellIn).isZero();
     }
 
     @Test
@@ -28,8 +29,8 @@ class GildedRoseTest {
         app.updateQuality();
         var updatedItem = app.items[0];
         assertThat(updatedItem.name).isEqualTo(REGULAR_GOODS);
-        assertThat(updatedItem.quality).isEqualTo(0);
-        assertThat(updatedItem.sellIn).isEqualTo(0);
+        assertThat(updatedItem.quality).isZero();
+        assertThat(updatedItem.sellIn).isZero();
     }
 
     @Test
@@ -39,7 +40,18 @@ class GildedRoseTest {
         app.updateQuality();
         var updatedItem = app.items[0];
         assertThat(updatedItem.name).isEqualTo(REGULAR_GOODS);
-        assertThat(updatedItem.quality).isEqualTo(0);
+        assertThat(updatedItem.quality).isZero();
+        assertThat(updatedItem.sellIn).isEqualTo(-1);
+    }
+
+    @Test
+    void whenRegularItemWithQualityOfOne_SellInDateIsPassed_ThenQualityDecreasesToZero() {
+        var items = new Item[] { new Item(REGULAR_GOODS, 0, 1) };
+        var app = new GildedRose(items);
+        app.updateQuality();
+        var updatedItem = app.items[0];
+        assertThat(updatedItem.name).isEqualTo(REGULAR_GOODS);
+        assertThat(updatedItem.quality).isZero();
         assertThat(updatedItem.sellIn).isEqualTo(-1);
     }
 
@@ -64,13 +76,14 @@ class GildedRoseTest {
     }
 
     @Test
-    void whenSulfurasIsAgedByOneDay_ThenQualityRemainsTheSame() {
+    void whenSulfurasIsAgedByOneDay_ThenQualityAndSellInRemainTheSame() {
         var items = new Item[] { new Item(SULFURAS, 1, 50) };
         var app = new GildedRose(items);
         app.updateQuality();
         var updatedItem = app.items[0];
         assertThat(updatedItem.name).isEqualTo(SULFURAS);
         assertThat(updatedItem.quality).isEqualTo(50);
+        assertThat(updatedItem.sellIn).isEqualTo(1);
     }
 
     @Test
@@ -110,6 +123,50 @@ class GildedRoseTest {
         app.updateQuality();
         var updatedItem = app.items[0];
         assertThat(updatedItem.name).isEqualTo(BACKSTAGE_PASSES);
-        assertThat(updatedItem.quality).isEqualTo(0);
+        assertThat(updatedItem.quality).isZero();
+    }
+
+    @Test
+    void whenConjuredItemIsAgedByOneDay_ThenQualityDegradesByTwo_AndSellInIsDecreasedByOne() {
+        var items = new Item[] { new Item(CONJURED, 1, 5) };
+        var app = new GildedRose(items);
+        app.updateQuality();
+        var updatedItem = app.items[0];
+        assertThat(updatedItem.name).isEqualTo(CONJURED);
+        assertThat(updatedItem.quality).isEqualTo(3);
+        assertThat(updatedItem.sellIn).isZero();
+    }
+
+    @Test
+    void whenConjuredItemOfZeroQualityIsAgedByOneDay_ThenQualityRemainsZero() {
+        var items = new Item[] { new Item(CONJURED, 1, 0) };
+        var app = new GildedRose(items);
+        app.updateQuality();
+        var updatedItem = app.items[0];
+        assertThat(updatedItem.name).isEqualTo(CONJURED);
+        assertThat(updatedItem.quality).isZero();
+        assertThat(updatedItem.sellIn).isZero();
+    }
+
+    @Test
+    void whenConjuredItemSellInDateIsPassed_ThenQualityDecreasesByFour() {
+        var items = new Item[] { new Item(CONJURED, 0, 4) };
+        var app = new GildedRose(items);
+        app.updateQuality();
+        var updatedItem = app.items[0];
+        assertThat(updatedItem.name).isEqualTo(CONJURED);
+        assertThat(updatedItem.quality).isZero();
+        assertThat(updatedItem.sellIn).isEqualTo(-1);
+    }
+
+    @Test
+    void whenConjuredItemSellInDateIsPassed_ThenQualityDecreasesToZero() {
+        var items = new Item[] { new Item(CONJURED, 0, 3) };
+        var app = new GildedRose(items);
+        app.updateQuality();
+        var updatedItem = app.items[0];
+        assertThat(updatedItem.name).isEqualTo(CONJURED);
+        assertThat(updatedItem.quality).isZero();
+        assertThat(updatedItem.sellIn).isEqualTo(-1);
     }
 }
